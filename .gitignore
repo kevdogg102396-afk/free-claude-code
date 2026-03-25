@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.env
+.nemo-code/
+__pycache__/
+*.pyc

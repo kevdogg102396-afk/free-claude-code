@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-fetch"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-memory"],
+      "env": {
+        "MEMORY_FILE": "/workspace/memory/knowledge-graph.json"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-filesystem", "/workspace"]
+    }
+  }
+}
