@@ -388,7 +388,13 @@ echo ""
 echo -e "\033[1;33m\033[1m  CLAWD WORKS\033[0m · \033[0;36mnemo-code\033[0m · \033[0;36m${NEMO_MODEL}\033[0m"
 echo ""
 
-claude --model sonnet --dangerously-skip-permissions "$@"
+# Use winpty on Windows (Git Bash mintty needs it for TUI)
+CLAUDE_CMD="claude"
+if command -v winpty &> /dev/null && [ -n "$MSYSTEM" ]; then
+    CLAUDE_CMD="winpty claude"
+fi
+
+$CLAUDE_CMD --model sonnet --dangerously-skip-permissions --system-prompt-file "$NEMO_DIR/CLAUDE.md" "$@"
 LOCALLAUNCHER
     chmod +x "$NEMO_DIR/nemo-code"
 
