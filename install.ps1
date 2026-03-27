@@ -3,7 +3,8 @@
 #
 # irm https://raw.githubusercontent.com/kevdogg102396-afk/free-claude-code/master/install.ps1 | iex
 
-$ErrorActionPreference = "Stop"
+# Don't use "Stop" — pip/npm write warnings to stderr which PS treats as fatal
+$ErrorActionPreference = "Continue"
 
 Clear-Host
 Write-Host ""
@@ -132,9 +133,9 @@ Write-Host "  Installing Claude Code CLI..." -ForegroundColor DarkGray
 npm install -g @anthropic-ai/claude-code 2>&1 | Select-Object -Last 1
 Write-Host "  ok Claude Code CLI" -ForegroundColor Green
 
-# Install LiteLLM
+# Install LiteLLM (suppress stderr — pip prints harmless dependency warnings)
 Write-Host "  Installing LiteLLM..." -ForegroundColor DarkGray
-& $pythonPath -m pip install "litellm[proxy]==1.82.6" --quiet 2>&1 | Select-Object -Last 1
+$pipOutput = & $pythonPath -m pip install "litellm[proxy]==1.82.6" --quiet 2>&1
 Write-Host "  ok LiteLLM" -ForegroundColor Green
 
 # ---- Step 4: Configure ----
