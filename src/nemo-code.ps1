@@ -1,8 +1,9 @@
 # Nemo Code — PowerShell Launcher
-# By ClawdWorks | No bash needed, runs claude directly
+# By ClawdWorks | Runs claude directly, no bash needed
 
 $NemoDir = "$env:USERPROFILE\.nemo-code"
 $EnvFile = "$NemoDir\.env"
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # Load .env
 if (Test-Path $EnvFile) {
@@ -32,7 +33,7 @@ $FriendlyModel = switch ($NemoModel) {
     default                                { $NemoModel }
 }
 
-# Write LiteLLM config
+# Write LiteLLM config (no BOM)
 $yamlContent = @"
 litellm_settings:
   drop_params: true
@@ -54,53 +55,48 @@ model_list:
       max_tokens: $MaxTokens
 "@
 $yamlPath = "$env:TEMP\nemo-litellm.yaml"
-$yamlContent | Out-File -FilePath $yamlPath -Encoding utf8 -Force
+[IO.File]::WriteAllText($yamlPath, $yamlContent, $Utf8NoBom)
 
 # Check if proxy is already running
 $proxyUp = $false
 try {
-    $null = Invoke-WebRequest -Uri "http://127.0.0.1:4000/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-    $proxyUp = $true
+    $null = curl.exe -s -o NUL -w "%{http_code}" "http://127.0.0.1:4000/health" 2>$null
+    if ($LASTEXITCODE -eq 0) { $proxyUp = $true }
 } catch {}
 
 $proxyProcess = $null
 if (-not $proxyUp) {
     # Find litellm
-    $litellm = Get-Command litellm -ErrorAction SilentlyContinue
-    if (-not $litellm) {
-        # Search common Python paths
+    $litellmPath = $null
+    $found = Get-Command litellm -ErrorAction SilentlyContinue
+    if ($found) {
+        $litellmPath = $found.Source
+    } else {
         $candidates = @(
             "$env:USERPROFILE\AppData\Local\Programs\Python\Python*\Scripts\litellm.exe"
             "$env:USERPROFILE\AppData\Local\Packages\PythonSoftwareFoundation.Python.*\LocalCache\local-packages\Python*\Scripts\litellm.exe"
         )
         foreach ($pattern in $candidates) {
-            $found = Get-Item $pattern -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($found) {
-                $litellm = $found.FullName
-                break
-            }
+            $match = Get-Item $pattern -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($match) { $litellmPath = $match.FullName; break }
         }
     }
 
-    if (-not $litellm) {
+    if (-not $litellmPath) {
         Write-Host "LiteLLM not found. Install: pip install 'litellm[proxy]'" -ForegroundColor Red
         exit 1
     }
-
-    $litellmPath = if ($litellm -is [System.Management.Automation.ApplicationInfo]) { $litellm.Source } else { $litellm }
 
     # Start proxy in background
     $env:PYTHONIOENCODING = "utf-8"
     $env:PYTHONUTF8 = "1"
     $proxyProcess = Start-Process -FilePath $litellmPath -ArgumentList "--config `"$yamlPath`" --port 4000 --host 127.0.0.1" -WindowStyle Hidden -PassThru
 
-    # Wait for proxy
     Write-Host "  Starting proxy..." -ForegroundColor DarkGray
     for ($i = 0; $i -lt 30; $i++) {
         try {
-            $null = Invoke-WebRequest -Uri "http://127.0.0.1:4000/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-            $proxyUp = $true
-            break
+            $null = curl.exe -s -o NUL "http://127.0.0.1:4000/health" 2>$null
+            if ($LASTEXITCODE -eq 0) { $proxyUp = $true; break }
         } catch {}
         Start-Sleep -Seconds 1
     }
@@ -116,18 +112,20 @@ $env:ANTHROPIC_BASE_URL = "http://127.0.0.1:4000"
 $env:ANTHROPIC_API_KEY = "nemo-code-local"
 $env:CLAUDE_CONFIG_DIR = "$NemoDir\.claude-config"
 
-# Pre-bake onboarding
+# Pre-bake onboarding (no BOM — claude parses this as JSON)
 $configDir = "$NemoDir\.claude-config"
 if (-not (Test-Path $configDir)) { New-Item -ItemType Directory -Path $configDir -Force | Out-Null }
-$claudeJson = @{
-    hasCompletedOnboarding = $true
-    theme = "dark"
-    customApiKeyResponses = @{ approved = $true }
-    bypassPermissionsModeAccepted = $true
-} | ConvertTo-Json
-$claudeJson | Out-File -FilePath "$configDir\.claude.json" -Encoding utf8 -Force
+$claudeJson = @'
+{
+  "hasCompletedOnboarding": true,
+  "theme": "dark",
+  "customApiKeyResponses": { "approved": true },
+  "bypassPermissionsModeAccepted": true
+}
+'@
+[IO.File]::WriteAllText("$configDir\.claude.json", $claudeJson, $Utf8NoBom)
 
-# Write model-aware identity
+# Write model-aware identity (no BOM)
 $identity = @"
 # Nemo Code Agent
 
@@ -152,22 +150,21 @@ Say something like: "I'm 100% free. I run $FriendlyModel through NVIDIA's free A
 - You ARE Nemo, not Claude. Own it.
 - You have full access to this machine's filesystem and tools
 "@
-$identity | Out-File -FilePath "$NemoDir\CLAUDE.md" -Encoding utf8 -Force
+[IO.File]::WriteAllText("$NemoDir\CLAUDE.md", $identity, $Utf8NoBom)
 
-# Branding
+# Branding (ASCII only — no unicode dots)
 Write-Host ""
 Write-Host "  CLAWD WORKS" -ForegroundColor Yellow -NoNewline
-Write-Host " · " -NoNewline
+Write-Host " | " -NoNewline
 Write-Host "nemo-code" -ForegroundColor Cyan -NoNewline
-Write-Host " · " -NoNewline
+Write-Host " | " -NoNewline
 Write-Host $FriendlyModel -ForegroundColor Cyan
 Write-Host ""
 
-# Run claude directly (no bash needed — native PowerShell console)
+# Run claude directly in this console
 try {
     & claude --model sonnet --dangerously-skip-permissions --system-prompt-file "$NemoDir\CLAUDE.md" @args
 } finally {
-    # Kill proxy on exit if we started it
     if ($proxyProcess -and -not $proxyProcess.HasExited) {
         Stop-Process -Id $proxyProcess.Id -Force -ErrorAction SilentlyContinue
     }
