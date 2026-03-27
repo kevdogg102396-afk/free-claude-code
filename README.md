@@ -6,8 +6,14 @@ Nemo Code gives you the full Claude Code CLI experience — tools, file editing,
 
 Built on the [Claude Code CLI](https://github.com/anthropics/claude-code) (Apache 2.0) + [LiteLLM](https://github.com/BerriAI/litellm) + [NVIDIA NIM](https://build.nvidia.com) free tier.
 
+### Mac / Linux
 ```bash
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/nemo-code/master/install.sh | bash
+```
+
+### Windows (PowerShell)
+```powershell
+curl.exe -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/nemo-code/master/install.sh | bash
 ```
 
 Then:
