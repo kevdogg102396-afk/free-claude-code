@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/nemo-code/master/
 
 ### Windows (PowerShell)
 ```powershell
-curl.exe -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/nemo-code/master/install.sh | bash
+curl.exe -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/nemo-code/master/install.sh -o install.sh; bash install.sh
 ```
 
 Then:
