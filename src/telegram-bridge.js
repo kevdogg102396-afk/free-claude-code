@@ -15,6 +15,14 @@ const MEMORY_DIR = '/workspace/memory';
 const HISTORY_FILE = path.join(MEMORY_DIR, 'conversation_history.json');
 const MAX_HISTORY = 20; // Keep last 20 exchanges for context
 
+// Model switching — maps TG commands to CC model slots
+const MODEL_MAP = {
+  sonnet: { cc: 'sonnet', name: 'Kimi K2.5', provider: 'Moonshot AI' },
+  opus:   { cc: 'opus',   name: 'Qwen 3.5 397B', provider: 'Alibaba' },
+  haiku:  { cc: 'haiku',  name: 'MiniMax M2.5', provider: 'MiniMax' },
+};
+let currentModel = 'sonnet';
+
 if (!BOT_TOKEN) {
   console.error('ERROR: TELEGRAM_BOT_TOKEN not set');
   process.exit(1);
@@ -118,7 +126,7 @@ function runClaude(prompt) {
       // Escape for shell
       const escaped = prompt.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/`/g, '\\`').replace(/\$/g, '\\$');
       const result = execSync(
-        `claude -p "${escaped}" --model sonnet --dangerously-skip-permissions --bare --system-prompt-file /workspace/CLAUDE.md --add-dir /workspace --mcp-config /workspace/.mcp.json --output-format text`,
+        `claude -p "${escaped}" --model ${currentModel} --dangerously-skip-permissions --bare --system-prompt-file /workspace/CLAUDE.md --add-dir /workspace --mcp-config /workspace/.mcp.json --output-format text`,
         {
           encoding: 'utf-8',
           timeout: 0, // no timeout — let Nemo cook
@@ -152,7 +160,28 @@ async function pollAndRespond() {
       }
 
       const userName = msg.from?.first_name || 'User';
-      console.log(`[${new Date().toISOString()}] ${userName}: ${msg.text.slice(0, 100)}`);
+      const text = msg.text.trim();
+      console.log(`[${new Date().toISOString()}] ${userName}: ${text.slice(0, 100)}`);
+
+      // Model switching commands
+      const cmdLower = text.toLowerCase();
+      if (cmdLower === '/sonnet' || cmdLower === '/opus' || cmdLower === '/haiku') {
+        const key = cmdLower.slice(1);
+        const m = MODEL_MAP[key];
+        currentModel = key;
+        await sendMessage(chatId, `Switched to ${m.name} (${m.provider}) ⚡\nAll messages now use ${key}.`);
+        continue;
+      }
+      if (cmdLower === '/model' || cmdLower === '/models') {
+        const m = MODEL_MAP[currentModel];
+        let lines = `Current model: ${m.name} (${currentModel})\n\nAvailable:\n`;
+        for (const [k, v] of Object.entries(MODEL_MAP)) {
+          const arrow = k === currentModel ? '→ ' : '  ';
+          lines += `${arrow}/${k} — ${v.name} (${v.provider})\n`;
+        }
+        await sendMessage(chatId, lines.trim());
+        continue;
+      }
 
       // Start typing indicator loop
       const stopTyping = startTypingLoop(chatId);
@@ -194,6 +223,8 @@ async function main() {
   console.log(`Bot token: ...${BOT_TOKEN.slice(-10)}`);
   console.log(`Allowed chats: ${ALLOWED_CHAT_IDS.join(', ')}`);
   console.log(`History: ${conversationHistory.length} messages loaded`);
+  console.log(`Default model: ${MODEL_MAP[currentModel].name} (${currentModel})`);
+  console.log('Commands: /sonnet /opus /haiku /model');
   console.log('Waiting for messages...\n');
 
   // Clear pending updates
