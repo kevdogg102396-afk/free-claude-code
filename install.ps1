@@ -161,7 +161,7 @@ $claudeJson = '{"hasCompletedOnboarding":true,"theme":"dark","customApiKeyRespon
 [IO.File]::WriteAllText("$NemoDir\.claude-config\.claude.json", $claudeJson, $Utf8NoBom)
 
 # Copy PowerShell launcher
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$scriptDir = if ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path } else { $null }
 $ps1Source = if ($scriptDir -and (Test-Path "$scriptDir\src\nemo-code.ps1")) {
     "$scriptDir\src\nemo-code.ps1"
 } else {

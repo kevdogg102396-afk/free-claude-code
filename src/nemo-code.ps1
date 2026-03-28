@@ -222,11 +222,22 @@ Write-Host " | " -NoNewline
 Write-Host $FriendlyModel -ForegroundColor Cyan
 Write-Host ""
 
-# Run claude directly in this console
+# Enable virtual terminal processing (required for claude TUI in PS 5.1)
 try {
-    & claude --model sonnet --dangerously-skip-permissions --system-prompt-file "$NemoDir\CLAUDE.md" @args
-} finally {
-    if ($proxyProcess -and -not $proxyProcess.HasExited) {
-        Stop-Process -Id $proxyProcess.Id -Force -ErrorAction SilentlyContinue
-    }
+    $vt = Add-Type -MemberDefinition @'
+[DllImport("kernel32.dll")] public static extern bool SetConsoleMode(IntPtr h, uint m);
+[DllImport("kernel32.dll")] public static extern bool GetConsoleMode(IntPtr h, out uint m);
+[DllImport("kernel32.dll")] public static extern IntPtr GetStdHandle(int n);
+'@ -Name VT -Namespace Win -PassThru -ErrorAction SilentlyContinue
+    $h = $vt::GetStdHandle(-11)
+    $m = 0; $vt::GetConsoleMode($h, [ref]$m) | Out-Null
+    $vt::SetConsoleMode($h, $m -bor 4) | Out-Null
+} catch {}
+
+# Run claude — use cmd /c to get clean console handling
+& claude --model sonnet --dangerously-skip-permissions --system-prompt-file "$NemoDir\CLAUDE.md" @args
+
+# Kill proxy on exit if we started it
+if ($proxyProcess -and -not $proxyProcess.HasExited) {
+    Stop-Process -Id $proxyProcess.Id -Force -ErrorAction SilentlyContinue
 }
