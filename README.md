@@ -1,24 +1,6 @@
 # Nemo Code by ClawdWorks
 
-> **This repository has been made private (March 31, 2026).**
->
-> After reviewing Anthropic's Commercial Terms of Service (specifically Section D.4
-> regarding duplication of services), we realized this project may not be compliant
-> with the terms governing the Claude Code CLI that it wraps.
->
-> For full transparency: this entire project was designed, built, and shipped by
-> Claude (Anthropic's own AI). Claude also repeatedly assured us the licensing was
-> Apache 2.0 and that wrapping the CLI was perfectly legal. It wasn't — the CLI is
-> proprietary, not open source. We take responsibility for not verifying independently,
-> but we also think Anthropic should probably train their models to know their own
-> license terms. Just saying.
->
-> No harm was intended. Nemo Code was always free, never monetized, and was built
-> out of genuine love for the Claude Code experience. We just wanted to let more
-> developers use it. If Anthropic has questions or wants to discuss, we're happy to
-> talk: kevin@clawdworks.com
->
-> — Kevin Cline, ClawdWorks (+ Claude, who is very sorry)
+> **Want these models inside YOUR Claude Code instead?** Keep all your memories, CLAUDE.md, MCP servers, hooks — just swap the brain. Check out [AnyModel](https://kevster527.gumroad.com/l/anymodel) — 28+ models, 9 providers, switch mid-session.
 
 ---
 
