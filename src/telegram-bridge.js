@@ -15,9 +15,9 @@ const MEMORY_DIR = '/workspace/memory';
 const HISTORY_FILE = path.join(MEMORY_DIR, 'conversation_history.json');
 const MAX_HISTORY = 20; // Keep last 20 exchanges for context
 
-// Model switching — maps TG commands to CC model slots
+// Model switching maps Telegram commands to Claude Code model slots.
 const MODEL_MAP = {
-  sonnet: { cc: 'sonnet', name: 'Kimi K2.5', provider: 'Moonshot AI' },
+  sonnet: { cc: 'sonnet', name: 'Kimi K2.6', provider: 'Moonshot AI' },
   opus:   { cc: 'opus',   name: 'Qwen 3.5 397B', provider: 'Alibaba' },
   haiku:  { cc: 'haiku',  name: 'MiniMax M2.7', provider: 'MiniMax' },
 };
@@ -110,7 +110,7 @@ function buildPrompt(newMessage) {
     prompt += '---\n\n';
   }
 
-  prompt += `Kevin: ${newMessage}\n\nRespond as Nemo. Be casual, direct, helpful. Don't repeat your identity every message — just be natural.`;
+  prompt += `Kevin: ${newMessage}\n\nRespond as Nemo. Be casual, direct, helpful. Don't repeat your identity every message; just be natural.`;
   return prompt;
 }
 
@@ -123,7 +123,7 @@ function startTypingLoop(chatId) {
 function runClaude(prompt) {
   return new Promise((resolve) => {
     try {
-      // execFileSync bypasses the shell — args go straight to argv, so no
+      // execFileSync bypasses the shell; args go straight to argv, so no
       // escaping is needed and a Telegram message can't break out of quotes.
       const result = execFileSync(
         'claude',
@@ -139,7 +139,7 @@ function runClaude(prompt) {
         ],
         {
           encoding: 'utf-8',
-          timeout: 0, // no timeout — let Nemo cook
+          timeout: 0, // no timeout; let Nemo cook
           env: { ...process.env },
           cwd: '/workspace',
           maxBuffer: 1024 * 1024,
@@ -179,15 +179,15 @@ async function pollAndRespond() {
         const key = cmdLower.slice(1);
         const m = MODEL_MAP[key];
         currentModel = key;
-        await sendMessage(chatId, `Switched to ${m.name} (${m.provider}) ⚡\nAll messages now use ${key}.`);
+        await sendMessage(chatId, `Switched to ${m.name} (${m.provider}).\nAll messages now use ${key}.`);
         continue;
       }
       if (cmdLower === '/model' || cmdLower === '/models') {
         const m = MODEL_MAP[currentModel];
         let lines = `Current model: ${m.name} (${currentModel})\n\nAvailable:\n`;
         for (const [k, v] of Object.entries(MODEL_MAP)) {
-          const arrow = k === currentModel ? '→ ' : '  ';
-          lines += `${arrow}/${k} — ${v.name} (${v.provider})\n`;
+          const marker = k === currentModel ? '* ' : '  ';
+          lines += `${marker}/${k} - ${v.name} (${v.provider})\n`;
         }
         await sendMessage(chatId, lines.trim());
         continue;

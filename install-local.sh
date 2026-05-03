@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nemo Code — Local Install (full power, no Docker)
+# Nemo Code  Local Install (full power, no Docker)
 # By ClawdWorks | https://github.com/clawdworks/nemo-code
 #
 # This installs Nemo Code directly on your machine.
@@ -31,7 +31,7 @@ if [ "$NODE_VER" -lt 18 ]; then
     echo -e "${RED}Node.js v18+ required.${RESET} You have $(node -v)"
     exit 1
 fi
-echo -e "${GREEN}✓${RESET} Node.js $(node -v)"
+echo -e "${GREEN}${RESET} Node.js $(node -v)"
 
 # Check Python
 if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
@@ -39,17 +39,17 @@ if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
     exit 1
 fi
 PYTHON=$(command -v python3 || command -v python)
-echo -e "${GREEN}✓${RESET} Python $($PYTHON --version 2>&1)"
+echo -e "${GREEN}${RESET} Python $($PYTHON --version 2>&1)"
 
 # Install Claude Code CLI
 echo -e "\n${DIM}Installing Claude Code CLI...${RESET}"
 npm install -g @anthropic-ai/claude-code
-echo -e "${GREEN}✓${RESET} Claude Code CLI installed"
+echo -e "${GREEN}${RESET} Claude Code CLI installed"
 
 # Install LiteLLM
 echo -e "\n${DIM}Installing LiteLLM proxy...${RESET}"
 $PYTHON -m pip install 'litellm[proxy]' --quiet
-echo -e "${GREEN}✓${RESET} LiteLLM installed"
+echo -e "${GREEN}${RESET} LiteLLM installed"
 
 # Create Nemo Code directory
 NEMO_DIR="$HOME/.nemo-code"
@@ -58,16 +58,20 @@ mkdir -p "$NEMO_DIR/workspace/memory"
 # Create the launcher script
 cat > "$NEMO_DIR/nemo-code" << 'LAUNCHER'
 #!/bin/bash
-# Nemo Code — ClawdWorks local launcher
+# Nemo Code  ClawdWorks local launcher
 
 NEMO_DIR="$HOME/.nemo-code"
-NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.5}"
+case "${NEMO_MODEL:-}" in
+  moonshotai/kimi-k2.5) NEMO_MODEL="moonshotai/kimi-k2.6" ;;
+  z-ai/glm-5.1) NEMO_MODEL="z-ai/glm5.1" ;;
+esac
+NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.6}"
 NEMO_MAX_TOKENS="${NEMO_MAX_TOKENS:-16384}"
 
 # Available models
 MODELS=(
-  "moonshotai/kimi-k2.5"
-  "z-ai/glm-5.1"
+  "moonshotai/kimi-k2.6"
+  "z-ai/glm5.1"
   "nvidia/nemotron-3-super-120b-a12b"
   "minimaxai/minimax-m2.7"
   "qwen/qwen3.5-397b-a17b"
@@ -93,14 +97,14 @@ model_list:
       model: nvidia_nim/${NEMO_MODEL}
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
-  - model_name: claude-opus-4-6
+  - model_name: claude-opus-4-7
     litellm_params:
-      model: nvidia_nim/${NEMO_MODEL}
+      model: nvidia_nim/qwen/qwen3.5-397b-a17b
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
   - model_name: claude-haiku-4-5-20251001
     litellm_params:
-      model: nvidia_nim/${NEMO_MODEL}
+      model: nvidia_nim/minimaxai/minimax-m2.7
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
 YAML
@@ -138,7 +142,7 @@ echo -e "  \033[1;37mModel:\033[0m   \033[0;36m${NEMO_MODEL}\033[0m"
 echo -e "  \033[1;37mTokens:\033[0m  \033[0;36m${NEMO_MAX_TOKENS}\033[0m"
 echo -e "  \033[1;37mMode:\033[0m    \033[0;36mLocal (full access)\033[0m"
 echo ""
-echo -e "\033[2m  ────────────────────────────────────────────────────────\033[0m"
+echo -e "\033[2m  /model switches model slots inside Claude Code\033[0m"
 echo ""
 
 ACTION="${1:-chat}"
@@ -176,17 +180,17 @@ case "$ACTION" in
     echo "Usage: clawdworks [command]  (or: nemo-code [command])"
     echo ""
     echo "  chat       Interactive chat (default)"
-    echo "  run        Headless — run a prompt and exit"
+    echo "  run        Headless  run a prompt and exit"
     echo "  models     List available models"
     echo "  help       Show this help"
     echo ""
     echo "Env vars:"
     echo "  NVIDIA_API_KEY    Your NVIDIA NIM key (required)"
-    echo "  NEMO_MODEL        Model (default: moonshotai/kimi-k2.5)"
+    echo "  NEMO_MODEL        Model (default: moonshotai/kimi-k2.6)"
     echo "  NEMO_MAX_TOKENS   Max tokens (default: 16384)"
     ;;
   *)
-    echo "Unknown: $ACTION — run 'clawdworks help'"
+    echo "Unknown: $ACTION  run 'clawdworks help'"
     exit 1
     ;;
 esac
@@ -239,6 +243,6 @@ echo ""
 echo -e "  Add to your shell profile for persistence:"
 echo -e "  ${DIM}echo 'export NVIDIA_API_KEY=\"your-key\"' >> ~/.bashrc${RESET}"
 echo ""
-echo -e "${YELLOW}${BOLD}  CLAWD WORKS${RESET} — ${CYAN}nemo-code${RESET}"
+echo -e "${YELLOW}${BOLD}  CLAWD WORKS${RESET}  ${CYAN}nemo-code${RESET}"
 echo -e "${DIM}  All the security. All the reliability. ALL the ease.${RESET}"
 echo ""

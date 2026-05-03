@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install LiteLLM (Anthropic-to-OpenAI proxy)
-# PINNED to 1.82.6 — versions 1.82.7 and 1.82.8 were compromised in a supply chain attack (March 2026)
+# PINNED to 1.82.6  versions 1.82.7 and 1.82.8 were compromised in a supply chain attack (March 2026)
 RUN pip3 install 'litellm[proxy]==1.82.6' --break-system-packages
 
 # NOTE: Claude Code CLI is installed at runtime by the entrypoint script,
@@ -40,7 +40,7 @@ RUN mkdir -p /home/nemo/.claude && chown -R nemo:nemo /home/nemo/.claude
 USER nemo
 
 # Create the global config that CC actually reads (~/.claude.json)
-RUN echo '{"hasCompletedOnboarding":true,"lastOnboardingVersion":"2.1.83","theme":"dark","numStartups":1,"bypassPermissionsModeAccepted":true,"customApiKeyResponses":{"approved":["nemo-code-local"],"rejected":[]},"projects":{"/workspace":{"hasTrustDialogAccepted":true,"allowedTools":[],"mcpContextUris":[],"enabledMcpjsonServers":[],"disabledMcpjsonServers":[],"hasCompletedProjectOnboarding":true}}}' > /home/nemo/.claude.json && \
+RUN echo '{"hasCompletedOnboarding":true,"lastOnboardingVersion":"2.1.126","theme":"dark","numStartups":1,"bypassPermissionsModeAccepted":true,"customApiKeyResponses":{"approved":["nemo-code-local"],"rejected":[]},"projects":{"/workspace":{"hasTrustDialogAccepted":true,"allowedTools":[],"mcpContextUris":[],"enabledMcpjsonServers":[],"disabledMcpjsonServers":[],"hasCompletedProjectOnboarding":true}}}' > /home/nemo/.claude.json && \
     mkdir -p /home/nemo/.claude && \
     echo '{"skipDangerousModePermissionPrompt":true}' > /home/nemo/.claude/settings.json
 
@@ -48,7 +48,7 @@ WORKDIR /workspace
 
 # Default env vars (overridable)
 ENV NVIDIA_API_KEY=""
-ENV NEMO_MODEL="moonshotai/kimi-k2.5"
+ENV NEMO_MODEL="moonshotai/kimi-k2.6"
 ENV NEMO_MAX_TOKENS="16384"
 
 ENTRYPOINT ["nemo-code"]

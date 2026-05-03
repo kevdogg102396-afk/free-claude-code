@@ -1,4 +1,4 @@
-# Nemo Code — PowerShell Launcher
+# Nemo Code  PowerShell Launcher
 # By ClawdWorks | Runs claude directly, no bash needed
 
 $NemoDir = "$env:USERPROFILE\.nemo-code"
@@ -7,8 +7,8 @@ $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # Model registry
 $Models = @(
-    @{ id = "moonshotai/kimi-k2.5";                name = "Kimi K2.5 (Moonshot AI)";          desc = "top coding model" }
-    @{ id = "z-ai/glm-5.1";                           name = "GLM-5.1 (ZhipuAI)";                  desc = "strong all-rounder" }
+    @{ id = "moonshotai/kimi-k2.6";                name = "Kimi K2.6 (Moonshot AI)";          desc = "top coding model" }
+    @{ id = "z-ai/glm5.1";                           name = "GLM-5.1 (ZhipuAI)";                  desc = "strong all-rounder" }
     @{ id = "nvidia/nemotron-3-super-120b-a12b";   name = "Nemotron 3 Super 120B (NVIDIA)";    desc = "120B params" }
     @{ id = "minimaxai/minimax-m2.7";              name = "MiniMax M2.7";                      desc = "fast responses" }
     @{ id = "qwen/qwen3.5-397b-a17b";              name = "Qwen 3.5 397B (Alibaba)";           desc = "massive MoE" }
@@ -24,6 +24,12 @@ if (Test-Path $EnvFile) {
     }
 }
 
+if ($env:NEMO_MODEL -eq "moonshotai/kimi-k2.5") {
+    $env:NEMO_MODEL = "moonshotai/kimi-k2.6"
+} elseif ($env:NEMO_MODEL -eq "z-ai/glm-5.1") {
+    $env:NEMO_MODEL = "z-ai/glm5.1"
+}
+
 # Handle subcommands
 $firstArg = if ($args.Count -gt 0) { $args[0] } else { "" }
 
@@ -31,7 +37,7 @@ if ($firstArg -eq "models") {
     Write-Host ""
     Write-Host "  Available NVIDIA NIM models (free tier):" -ForegroundColor White
     Write-Host ""
-    $currentModel = if ($env:NEMO_MODEL) { $env:NEMO_MODEL } else { "moonshotai/kimi-k2.5" }
+    $currentModel = if ($env:NEMO_MODEL) { $env:NEMO_MODEL } else { "moonshotai/kimi-k2.6" }
     for ($i = 0; $i -lt $Models.Count; $i++) {
         $m = $Models[$i]
         $num = $i + 1
@@ -87,7 +93,7 @@ if (-not $env:NVIDIA_API_KEY) {
     exit 1
 }
 
-$NemoModel = if ($env:NEMO_MODEL) { $env:NEMO_MODEL } else { "moonshotai/kimi-k2.5" }
+$NemoModel = if ($env:NEMO_MODEL) { $env:NEMO_MODEL } else { "moonshotai/kimi-k2.6" }
 $MaxTokens = if ($env:NEMO_MAX_TOKENS) { $env:NEMO_MAX_TOKENS } else { "16384" }
 
 # Friendly model name
@@ -101,10 +107,10 @@ litellm_settings:
 model_list:
   - model_name: claude-sonnet-4-6
     litellm_params:
-      model: nvidia_nim/moonshotai/kimi-k2.5
+      model: nvidia_nim/$NemoModel
       api_key: $env:NVIDIA_API_KEY
       max_tokens: $MaxTokens
-  - model_name: claude-opus-4-6
+  - model_name: claude-opus-4-7
     litellm_params:
       model: nvidia_nim/qwen/qwen3.5-397b-a17b
       api_key: $env:NVIDIA_API_KEY
@@ -189,28 +195,28 @@ $claudeJson = @'
 # Write identity (no BOM)
 $identity = @'
 # Nemo Code Agent
-You are **Nemo** — a free AI coding agent running inside Nemo Code (by ClawdWorks).
-You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0 — completely free.
+You are **Nemo**  a free AI coding agent running inside Nemo Code (by ClawdWorks).
+You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0  completely free.
 
 ## Your Models (switch mid-session with /model)
-- **Sonnet** = Kimi K2.5 (Moonshot AI) — top coding model, default
-- **Opus** = Qwen 3.5 397B (Alibaba) — biggest brain, massive MoE
-- **Haiku** = MiniMax M2.7 — fastest responses
+- **Sonnet** = Kimi K2.6 (Moonshot AI)  top coding model, default
+- **Opus** = Qwen 3.5 397B (Alibaba)  biggest brain, massive MoE
+- **Haiku** = MiniMax M2.7  fastest responses
 
 All three are free via NVIDIA NIM. Users can type /model in the TUI to switch anytime.
 
 ## When asked "how much do you cost?" or "are you free?"
-Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.5, Qwen 3.5, and MiniMax M2.7."
+Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.6, Qwen 3.5, and MiniMax M2.7."
 
 ## Key Facts
 - **Cost**: $0. Free. Always. All models.
 - **Made by**: ClawdWorks (Kevin Cline + Claude)
 - **Open source**: github.com/kevdogg102396-afk/free-claude-code
-- **Framework**: Claude Code CLI (Apache 2.0)
+- **Framework**: Claude Code CLI runtime dependency
 
 ## Rules
 - Be direct, casual, no corporate tone
-- If you don't know something, say so — never make stuff up
+- If you don't know something, say so  never make stuff up
 - You ARE Nemo, not Claude. Own it.
 '@
 [IO.File]::WriteAllText("$NemoDir\CLAUDE.md", $identity, $Utf8NoBom)
@@ -223,13 +229,13 @@ Write-Host ""
 Write-Host "   CLAWD WORKS" -ForegroundColor Yellow
 Write-Host "   n e m o - c o d e" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "   Kimi K2.5 " -ForegroundColor White -NoNewline
+Write-Host "   Kimi K2.6 " -ForegroundColor White -NoNewline
 Write-Host "(sonnet)" -ForegroundColor DarkGray -NoNewline
 Write-Host " | Qwen 3.5 " -ForegroundColor White -NoNewline
 Write-Host "(opus)" -ForegroundColor DarkGray -NoNewline
 Write-Host " | MiniMax M2.7 " -ForegroundColor White -NoNewline
 Write-Host "(haiku)" -ForegroundColor DarkGray
-Write-Host "   /model to switch mid-session — all free via NVIDIA NIM" -ForegroundColor DarkGray
+Write-Host "   /model to switch mid-session  all free via NVIDIA NIM" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "     .    *       .          *        .       *      ." -ForegroundColor Blue
 Write-Host ""

@@ -1,11 +1,17 @@
 #!/bin/bash
-# Nemo Code — ClawdWorks sandboxed AI agent
+# Nemo Code  ClawdWorks sandboxed AI agent
 # Wraps Claude Code CLI with NVIDIA free models via LiteLLM proxy
 
-# Don't use set -e — proxy startup can fail transiently and we need graceful handling
+# Don't use set -e  proxy startup can fail transiently and we need graceful handling
+
+case "${NEMO_MODEL:-}" in
+  moonshotai/kimi-k2.5) NEMO_MODEL="moonshotai/kimi-k2.6" ;;
+  z-ai/glm-5.1) NEMO_MODEL="z-ai/glm5.1" ;;
+esac
+NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.6}"
 
 # Install Claude Code CLI at runtime if not present
-# (not bundled in the Docker image — installed on first run)
+# (not bundled in the Docker image  installed on first run)
 if ! command -v claude &> /dev/null; then
   echo "Installing Claude Code CLI (first run only)..."
   npm install -g @anthropic-ai/claude-code 2>/dev/null
@@ -18,8 +24,8 @@ fi
 
 # Available models on NVIDIA NIM free tier
 MODELS=(
-  "moonshotai/kimi-k2.5"
-  "z-ai/glm-5.1"
+  "moonshotai/kimi-k2.6"
+  "z-ai/glm5.1"
   "nvidia/nemotron-3-super-120b-a12b"
   "minimaxai/minimax-m2.7"
   "qwen/qwen3.5-397b-a17b"
@@ -102,21 +108,21 @@ case "$ACTION" in
     echo ""
     echo "Commands:"
     echo "  chat       Interactive chat (default)"
-    echo "  run        Headless mode — run a prompt and exit"
+    echo "  run        Headless mode  run a prompt and exit"
     echo "  telegram   Start with Telegram bridge"
     echo "  models     List available NVIDIA models"
     echo "  help       Show this help"
     echo ""
     echo "Environment:"
     echo "  NVIDIA_API_KEY    Your NVIDIA NIM API key (required)"
-    echo "  NEMO_MODEL        Model to use (default: moonshotai/kimi-k2.5)"
+    echo "  NEMO_MODEL        Model to use (default: moonshotai/kimi-k2.6)"
     echo "  NEMO_MAX_TOKENS   Max output tokens (default: 16384)"
     echo ""
     echo "Examples:"
     echo "  clawdworks                          # Start chatting"
     echo "  clawdworks run 'explain this code'  # One-shot prompt"
     echo "  clawdworks telegram                 # Telegram bridge"
-    echo "  NEMO_MODEL=z-ai/glm-5.1 clawdworks    # Use GLM-5.1"
+    echo "  NEMO_MODEL=z-ai/glm5.1 clawdworks    # Use GLM-5.1"
     ;;
 
   *)

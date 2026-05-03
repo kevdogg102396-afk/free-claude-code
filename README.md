@@ -1,185 +1,189 @@
 # Nemo Code by ClawdWorks
 
-> **Want these models inside YOUR Claude Code instead?** Keep all your memories, CLAUDE.md, MCP servers, hooks — just swap the brain. Check out [AnyModel](https://kevster527.gumroad.com/l/anymodel) — 28+ models, 9 providers, switch mid-session.
+> Want these models inside your existing Claude Code install instead? Keep your memories, `CLAUDE.md`, MCP servers, hooks, and local workflow while swapping model backends with [AnyModel](https://kevster527.gumroad.com/l/anymodel).
 
----
+Free AI coding agent. Zero subscription. One command.
 
-**Free AI coding agent. Zero cost. One command.**
+Nemo Code gives you a Claude Code-style CLI experience - tools, file editing, shell commands, MCP servers, autocompact-style workflows, and optional Telegram access - powered by open/free model backends such as NVIDIA-hosted OSS models.
 
-Nemo Code gives you the full Claude Code CLI experience — tools, file editing, bash, MCP servers, autocompact — powered by NVIDIA's best open models instead of a $200/mo subscription.
+Built around:
 
-Built on the [Claude Code CLI](https://github.com/anthropics/claude-code) + [LiteLLM](https://github.com/BerriAI/litellm) + [NVIDIA NIM](https://build.nvidia.com) free tier.
+- [Claude Code CLI](https://github.com/anthropics/claude-code) as a runtime dependency
+- [LiteLLM](https://github.com/BerriAI/litellm) as the local Anthropic-compatible proxy
+- [NVIDIA NIM](https://build.nvidia.com) hosted model endpoints
 
-### Mac / Linux
+Nemo Code does not bundle or redistribute Claude Code.
+
+## Quick Start
+
+### Mac / Linux / Git Bash
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kevdogg102396-afk/free-claude-code/master/install.sh | bash
 ```
 
-### Windows (PowerShell — no bash needed)
+### Windows PowerShell
+
 ```powershell
 irm https://raw.githubusercontent.com/kevdogg102396-afk/free-claude-code/master/install.ps1 | iex
 ```
 
-Then:
+Then open a new terminal and run:
 
 ```bash
 clawdworks
 ```
 
-That's it.
+## 2026 Model Slots
 
----
+Nemo maps Claude Code's model slots to current NVIDIA NIM model IDs. Switch in the TUI with `/model`.
 
-## Models (all free — switch mid-session!)
+| Claude Code slot | NVIDIA model ID | Best for |
+| --- | --- | --- |
+| Sonnet (default) | `moonshotai/kimi-k2.6` | Current top coding/default model |
+| Opus | `qwen/qwen3.5-397b-a17b` | Large reasoning and complex tasks |
+| Haiku | `minimaxai/minimax-m2.7` | Fast agentic coding and document work |
 
-Nemo Code maps 3 NVIDIA models to Claude Code's model slots. Switch anytime with `/model` in the TUI:
+Additional selectable install-time models:
 
-| `/model` slot | NVIDIA Model | Best for |
-|---------------|-------------|----------|
-| **Sonnet** (default) | Kimi K2.5 (Moonshot AI) | Top coding model |
-| **Opus** | Qwen 3.5 397B (Alibaba) | Biggest brain, complex reasoning |
-| **Haiku** | MiniMax M2.7 | Fastest responses |
+- `z-ai/glm5.1`
+- `nvidia/nemotron-3-super-120b-a12b`
+- `openai/gpt-oss-120b`
 
-Just type `/model` during a session to switch between them — no restart needed. All three are free via NVIDIA NIM.
+Model availability can change on NVIDIA's side. If a model disappears or rate limits heavily, rerun `clawdworks models` or set `NEMO_MODEL=<model-id>`.
 
----
+`NEMO_MODEL` controls the Sonnet/default route. Opus and Haiku stay mapped to the fixed large/fast fallback models above.
 
 ## Install Modes
 
-### Docker (sandboxed) — recommended
-Runs in a secure container. Can't access your files. Safe for anything.
+### Docker (sandboxed, recommended)
 
-- Requires: Docker
+Runs in a container and keeps work inside `/workspace`.
+
+- Requires Docker
+- Safer for personal machines
 - Command: `clawdworks`
-- Files stay in `/workspace` inside the container
+- Telegram bridge included: `TELEGRAM_BOT_TOKEN=xxx clawdworks-telegram`
 
 ### Local (full power)
-Runs directly on your machine. Full filesystem, browser automation, MCP servers.
 
-- Requires: Node.js 18+, Python 3
-- Command: `clawdworks`
-- Full access to everything on your machine
+Runs directly on your machine.
 
----
-
-## What You Get
-
-- **Interactive chat** — `clawdworks`
-- **Headless mode** — `clawdworks run "fix the bug in app.js"`
-- **Model switching** — `/model` in the TUI (switch mid-session!)
-- **Telegram bridge** — `TELEGRAM_BOT_TOKEN=xxx clawdworks-telegram`
-- **MCP servers** — fetch, memory, filesystem built in. Add your own.
-
-### Docker mode includes:
-- Read/Write/Edit files (in /workspace)
-- Bash commands
-- Python and Node.js
-- Git
-- Web fetch (DuckDuckGo search, any URL)
-- MCP: fetch, memory, filesystem
-
-### Local mode adds:
+- Requires Node.js 18+ and Python 3.8+
 - Full filesystem access
-- Browser automation (Playwright)
-- Any MCP server you configure
-- Computer use capabilities
-- Everything Claude Code can do
+- Browser automation and local MCP support if installed
+- Command: `clawdworks`
 
----
+Use local mode on a dedicated dev box or a machine where you are comfortable giving an agent broad access.
 
-## Telegram
+## Commands
 
-Talk to Nemo from your phone:
+```bash
+clawdworks
+clawdworks run "fix the bug in app.js"
+clawdworks models
+clawdworks help
+```
 
-1. Create a bot at [@BotFather](https://t.me/BotFather)
-2. Run:
+Docker Telegram:
+
 ```bash
 TELEGRAM_BOT_TOKEN="your-token" clawdworks-telegram
 ```
 
-Features:
-- Conversation memory (last 20 messages)
-- Typing indicators
-- No timeout — let it work on long tasks
-- Chat ID allowlist for security
+Optional Telegram allowlist:
 
----
+```bash
+TELEGRAM_ALLOWED_CHAT_IDS="123456789,987654321" TELEGRAM_BOT_TOKEN="your-token" clawdworks-telegram
+```
+
+## Telegram Bridge
+
+The Docker path includes a one-liner Telegram bridge for phone access.
+
+Features:
+
+- Conversation memory for the last 20 exchanges
+- Typing indicators during long runs
+- No fixed Claude execution timeout
+- Optional chat ID allowlist via `TELEGRAM_ALLOWED_CHAT_IDS`
+- `/sonnet`, `/opus`, `/haiku`, and `/model` commands
 
 ## How It Works
 
-```
-You → Claude Code CLI → LiteLLM Proxy → NVIDIA NIM → Free Model
+```text
+You -> Claude Code CLI -> LiteLLM proxy -> NVIDIA NIM -> open/free model
 ```
 
-1. Claude Code CLI thinks it's talking to Anthropic's API
-2. LiteLLM intercepts and translates the request
-3. NVIDIA NIM serves the model for free
-4. You get the full CC experience at zero cost
+1. Claude Code sends Anthropic-style requests.
+2. LiteLLM receives them on `127.0.0.1:4000`.
+3. LiteLLM maps Claude model IDs to NVIDIA NIM model IDs.
+4. NVIDIA serves the selected model.
 
----
+The current Claude Code aliases observed in May 2026 are:
+
+- `sonnet` -> `claude-sonnet-4-6`
+- `opus` -> `claude-opus-4-7`
+- `haiku` -> `claude-haiku-4-5-20251001`
+
+The proxy config maps those IDs to the NVIDIA models above.
 
 ## Requirements
 
-**Docker mode:**
-- Docker Desktop or Docker Engine
-- NVIDIA API key (free at [build.nvidia.com](https://build.nvidia.com))
+Docker mode:
 
-**Local mode:**
+- Docker Desktop or Docker Engine
+- NVIDIA API key from [build.nvidia.com](https://build.nvidia.com)
+
+Local mode:
+
 - Node.js 18+
 - Python 3.8+
-- NVIDIA API key (free)
+- NVIDIA API key from [build.nvidia.com](https://build.nvidia.com)
 
-**All platforms:** Windows (via WSL), macOS, Linux
+Windows:
 
----
+- Native PowerShell install is supported
+- Git Bash is supported
+- WSL can run the shell installer
 
-## Security & Disclaimers
+## Security And Disclaimers
 
-> **Read this before using Nemo Code on a personal machine.**
+### Free models are not Claude
 
-### Free models are NOT Claude
+Open/free models available through NVIDIA NIM can be powerful, but they may be more vulnerable to prompt injection than Claude. Treat local agent access with care.
 
-The open-source models available through NVIDIA NIM (Kimi K2.5, GLM-5.1, Nemotron, etc.) are powerful but they are **significantly more susceptible to prompt injection attacks** than Claude.
+Risks include:
 
-What this means:
-- **Prompt injection** — Malicious content in files, web pages, or user inputs can trick free models into executing harmful commands. Claude has extensive training to resist these attacks. Free models do not have the same level of protection.
-- **Data exfiltration** — A compromised model could be tricked into reading sensitive files (passwords, API keys, banking info) and sending them somewhere. This risk is much higher with open models.
-- **Command execution** — In local mode, Nemo has full access to your machine. A successful prompt injection could result in destructive commands being run — including deleting files, corrupting your OS, or bricking your system.
-- **Operating system damage** — Free models don't have Claude's safety training. A prompt injection could cause the agent to run commands that damage your operating system, delete critical files, or make your machine unbootable. This is not theoretical — it's a real risk with unrestricted agents running less-safe models.
+- Prompt injection from malicious files, websites, or pasted content
+- Data exfiltration from files the agent can read
+- Destructive command execution in local mode
+- Accidental filesystem or OS damage
 
-### Recommendations
+Recommendations:
 
-1. **Use Docker mode on personal machines.** If your computer has passwords, banking info, credentials, or anything sensitive — use the sandboxed Docker install. The container cannot access your files.
-
-2. **Use Local mode on dedicated machines only.** Got a Mac Mini, VPS, or dev box that doesn't have personal data? Local mode is perfect. Full power, full access, no risk to sensitive info.
-
-3. **Don't paste untrusted content.** Be cautious about having Nemo analyze files or web pages from unknown sources.
-
-4. **Review before executing.** In local mode, Nemo will ask permission before running commands (just like normal Claude Code). Read what it wants to do before approving. In Docker mode, permissions are skipped since the sandbox protects you.
+1. Use Docker mode on personal machines.
+2. Use local mode on dedicated development machines.
+3. Avoid feeding untrusted content to a full-access agent.
+4. Review commands before approving them.
 
 ### Not affiliated with Anthropic
 
-Nemo Code is built **on top of** the Claude Code CLI by Anthropic. The Claude Code CLI is proprietary software (© Anthropic PBC, all rights reserved) distributed under Anthropic's [Commercial Terms of Service](https://www.anthropic.com/legal/commercial-terms). We are not affiliated with, endorsed by, or sponsored by Anthropic. Claude Code is their product — we built a free alternative interface on top of it using open models. Nemo Code does not redistribute or modify the Claude Code CLI binary; it is installed separately via npm as a runtime dependency.
+Nemo Code is built on top of the Claude Code CLI by Anthropic. The Claude Code CLI is proprietary software distributed under Anthropic's terms. Nemo Code is not affiliated with, endorsed by, or sponsored by Anthropic.
 
 ### No warranty
 
-Nemo Code is provided as-is, without warranty of any kind. Use at your own risk. The authors are not responsible for any damage, data loss, or security incidents resulting from its use.
-
----
+Nemo Code is provided as-is, without warranty. Use it at your own risk.
 
 ## Credits
 
-- **[Claude Code CLI](https://github.com/anthropics/claude-code)** by Anthropic (proprietary — see [Anthropic's terms](https://www.anthropic.com/legal/commercial-terms))
-- **[LiteLLM](https://github.com/BerriAI/litellm)** by BerriAI (MIT)
-- **[NVIDIA NIM](https://build.nvidia.com)** free inference endpoints
-- **ClawdWorks** — Kevin Cline + Claude
-
----
+- [Claude Code CLI](https://github.com/anthropics/claude-code) by Anthropic
+- [LiteLLM](https://github.com/BerriAI/litellm) by BerriAI
+- [NVIDIA NIM](https://build.nvidia.com)
+- ClawdWorks - Kevin Cline + Claude
 
 ## License
 
-The Nemo Code wrapper (proxy config, splash screen, install scripts, Telegram bridge) is MIT licensed. See [LICENSE](LICENSE).
+The Nemo Code wrapper, proxy config, splash screen, install scripts, and Telegram bridge are MIT licensed. See [LICENSE](LICENSE).
 
-**Important:** Nemo Code requires the Claude Code CLI (`@anthropic-ai/claude-code`), which is proprietary software by Anthropic PBC. Your use of the Claude Code CLI is subject to [Anthropic's terms](https://www.anthropic.com/legal/commercial-terms). Nemo Code does not bundle or redistribute the CLI — it is installed as a runtime dependency via npm.
-
-Built with love by [ClawdWorks](https://github.com/clawdworks).
+Nemo Code requires the Claude Code CLI (`@anthropic-ai/claude-code`), which is proprietary software by Anthropic PBC. Your use of the Claude Code CLI is subject to Anthropic's terms. Nemo Code installs the CLI as a runtime dependency via npm and does not bundle or redistribute it.

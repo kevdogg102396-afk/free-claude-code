@@ -1,9 +1,9 @@
-# Nemo Code — Windows PowerShell Installer
+# Nemo Code  Windows PowerShell Installer
 # By ClawdWorks | One command. Free AI coding agent.
 #
 # irm https://raw.githubusercontent.com/kevdogg102396-afk/free-claude-code/master/install.ps1 | iex
 
-# Don't use "Stop" — pip/npm write warnings to stderr which PS treats as fatal
+# Don't use "Stop"  pip/npm write warnings to stderr which PS treats as fatal
 $ErrorActionPreference = "Continue"
 
 Clear-Host
@@ -19,7 +19,7 @@ Write-Host ""
 Write-Host "     .    *       .          *        .       *      ." -ForegroundColor Blue
 Write-Host ""
 Write-Host "  Free AI coding agent powered by NVIDIA's best open models." -ForegroundColor White
-Write-Host "  Built on the Claude Code CLI framework (Apache 2.0)." -ForegroundColor White
+Write-Host "  Built on the Claude Code CLI runtime dependency." -ForegroundColor White
 Write-Host ""
 Write-Host "  --------------------------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
@@ -64,7 +64,7 @@ Write-Host "  [2/4] Choose Your Model" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  All models are " -NoNewline; Write-Host "free" -ForegroundColor Green -NoNewline; Write-Host " via NVIDIA NIM:"
 Write-Host ""
-Write-Host "    1) Kimi K2.5           - Moonshot AI, top coding model " -NoNewline; Write-Host "(recommended)" -ForegroundColor Green
+Write-Host "    1) Kimi K2.6           - Moonshot AI, top coding model " -NoNewline; Write-Host "(recommended)" -ForegroundColor Green
 Write-Host "    2) GLM-5.1               - ZhipuAI, strong all-rounder"
 Write-Host "    3) Nemotron 3 Super     - NVIDIA, 120B params"
 Write-Host "    4) MiniMax M2.7         - MiniMax, fast responses"
@@ -75,13 +75,13 @@ $modelChoice = Read-Host "  Choose [1]"
 if (-not $modelChoice) { $modelChoice = "1" }
 
 $NemoModel = switch ($modelChoice) {
-    "1" { "moonshotai/kimi-k2.5" }
-    "2" { "z-ai/glm-5.1" }
+    "1" { "moonshotai/kimi-k2.6" }
+    "2" { "z-ai/glm5.1" }
     "3" { "nvidia/nemotron-3-super-120b-a12b" }
     "4" { "minimaxai/minimax-m2.7" }
     "5" { "qwen/qwen3.5-397b-a17b" }
     "6" { "openai/gpt-oss-120b" }
-    default { "moonshotai/kimi-k2.5" }
+    default { "moonshotai/kimi-k2.6" }
 }
 Write-Host "  ok Selected: $NemoModel" -ForegroundColor Green
 Write-Host ""
@@ -133,7 +133,7 @@ Write-Host "  Installing Claude Code CLI..." -ForegroundColor DarkGray
 npm install -g @anthropic-ai/claude-code 2>&1 | Select-Object -Last 1
 Write-Host "  ok Claude Code CLI" -ForegroundColor Green
 
-# Install LiteLLM (suppress stderr — pip prints harmless dependency warnings)
+# Install LiteLLM (suppress stderr  pip prints harmless dependency warnings)
 Write-Host "  Installing LiteLLM..." -ForegroundColor DarkGray
 $pipOutput = & $pythonPath -m pip install "litellm[proxy]==1.82.6" --quiet 2>&1
 Write-Host "  ok LiteLLM" -ForegroundColor Green
@@ -185,7 +185,11 @@ NEMO_DIR="$HOME/.nemo-code"
 if [ -z "$NVIDIA_API_KEY" ]; then
     if [ -f "$NEMO_DIR/.env" ]; then source "$NEMO_DIR/.env"; else echo "NVIDIA_API_KEY not set."; exit 1; fi
 fi
-NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.5}"
+case "${NEMO_MODEL:-}" in
+    moonshotai/kimi-k2.5) NEMO_MODEL="moonshotai/kimi-k2.6" ;;
+    z-ai/glm-5.1) NEMO_MODEL="z-ai/glm5.1" ;;
+esac
+NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.6}"
 NEMO_MAX_TOKENS="${NEMO_MAX_TOKENS:-16384}"
 cat > /tmp/nemo-litellm.yaml << YAML
 litellm_settings:
@@ -193,10 +197,10 @@ litellm_settings:
 model_list:
   - model_name: claude-sonnet-4-6
     litellm_params:
-      model: nvidia_nim/moonshotai/kimi-k2.5
+      model: nvidia_nim/${NEMO_MODEL}
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
-  - model_name: claude-opus-4-6
+  - model_name: claude-opus-4-7
     litellm_params:
       model: nvidia_nim/qwen/qwen3.5-397b-a17b
       api_key: ${NVIDIA_API_KEY}
@@ -229,28 +233,28 @@ cat > "$CLAUDE_CONFIG_DIR/.claude.json" << 'CJSON'
 CJSON
 cat > "$NEMO_DIR/CLAUDE.md" << 'IDENTITY'
 # Nemo Code Agent
-You are **Nemo** — a free AI coding agent running inside Nemo Code (by ClawdWorks).
-You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0 — completely free.
+You are **Nemo**  a free AI coding agent running inside Nemo Code (by ClawdWorks).
+You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0  completely free.
 
 ## Your Models (switch mid-session with /model)
-- **Sonnet** = Kimi K2.5 (Moonshot AI) — top coding model, default
-- **Opus** = Qwen 3.5 397B (Alibaba) — biggest brain, massive MoE
-- **Haiku** = MiniMax M2.7 — fastest responses
+- **Sonnet** = Kimi K2.6 (Moonshot AI)  top coding model, default
+- **Opus** = Qwen 3.5 397B (Alibaba)  biggest brain, massive MoE
+- **Haiku** = MiniMax M2.7  fastest responses
 
 All three are free via NVIDIA NIM. Users can type /model in the TUI to switch anytime.
 
 ## When asked "how much do you cost?" or "are you free?"
-Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.5, Qwen 3.5, and MiniMax M2.7."
+Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.6, Qwen 3.5, and MiniMax M2.7."
 
 ## Key Facts
 - **Cost**: $0. Free. Always. All models.
 - **Made by**: ClawdWorks (Kevin Cline + Claude)
 - **Open source**: github.com/kevdogg102396-afk/free-claude-code
-- **Framework**: Claude Code CLI (Apache 2.0)
+- **Framework**: Claude Code CLI runtime dependency
 
 ## Rules
 - Be direct, casual, no corporate tone
-- If you don't know something, say so — never make stuff up
+- If you don't know something, say so  never make stuff up
 - You ARE Nemo, not Claude. Own it.
 IDENTITY
 echo ""
@@ -260,8 +264,8 @@ echo ""
 echo -e "\033[1;33m   CLAWD WORKS\033[0m"
 echo -e "\033[0;36m   n e m o - c o d e\033[0m"
 echo ""
-echo -e "\033[0;37m   Kimi K2.5 \033[0;90m(sonnet)\033[0;37m | Qwen 3.5 \033[0;90m(opus)\033[0;37m | MiniMax M2.7 \033[0;90m(haiku)\033[0m"
-echo -e "\033[0;90m   /model to switch mid-session — all free via NVIDIA NIM\033[0m"
+echo -e "\033[0;37m   Kimi K2.6 \033[0;90m(sonnet)\033[0;37m | Qwen 3.5 \033[0;90m(opus)\033[0;37m | MiniMax M2.7 \033[0;90m(haiku)\033[0m"
+echo -e "\033[0;90m   /model to switch mid-session  all free via NVIDIA NIM\033[0m"
 echo ""
 echo -e "\033[0;34m     .    *       .          *        .       *      .\033[0m"
 echo ""

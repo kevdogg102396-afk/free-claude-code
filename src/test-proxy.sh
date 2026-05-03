@@ -1,6 +1,6 @@
 #!/bin/bash
 export NVIDIA_API_KEY="${NVIDIA_API_KEY}"
-export NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.5}"
+export NEMO_MODEL="${NEMO_MODEL:-moonshotai/kimi-k2.6}"
 export NEMO_MAX_TOKENS="${NEMO_MAX_TOKENS:-16384}"
 
 echo "Starting proxy..."
